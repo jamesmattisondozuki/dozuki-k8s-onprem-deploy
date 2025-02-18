@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  labels:
+    app: minio
+    app.kubernetes.io/managed-by: Helm
+    chart: minio-5.3.0
+    heritage: Helm
+    release: {{ .Values.customer }}
+  name: {{ .Values.customer }}-minio
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: minio
+      release: {{ .Values.customer }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: minio
+        release: {{ .Values.customer }}
+      name: {{ .Values.customer }}-minio
+    spec:
+      containers:
+      - command:
+        - /bin/sh
+        - -ce
+        - /usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/
+          --address :9000 --console-address :9001
+        env:
+        - name: MINIO_ROOT_USER
+          value: {{ .Values.minio.user }}
+        - name: MINIO_ROOT_PASSWORD
+          value: {{ .Values.minio.password }}
+        - name: MINIO_PROMETHEUS_AUTH_TYPE
+          value: public
+        image: quay.io/minio/minio:RELEASE.2024-04-18T19-09-19Z
+        imagePullPolicy: IfNotPresent
+        name: minio
+        ports:
+        - containerPort: 9000
+          name: http
+          protocol: TCP
+        - containerPort: 9001
+          name: http-console
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        securityContext:
+          readOnlyRootFilesystem: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/credentials
+          name: minio-user
+          readOnly: true
+        - mountPath: /export
+          name: export
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsUser: 1000
+      serviceAccount: minio-sa
+      serviceAccountName: minio-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: export
+        persistentVolumeClaim:
+          claimName: {{ .Values.customer }}-minio
+      - name: minio-user
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.customer }}-minio

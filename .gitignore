@@ -1,0 +1,9 @@
+### Helm template
+# Ignore all tar archives
+*.tar
+*.tar.*
+*.tgz
+
+# Ignore rendered manifests from airgap builder
+rendered-manifests.yaml
+*venv*

@@ -1,0 +1,178 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.customer }}-app-deployment
+  labels:
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+    app: {{ .Values.customer }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.customer }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.customer }}
+    spec:
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: dozuki-resources-configmap
+        name: {{ .Values.customer }}-default
+      - name: le-tls-cert
+        secret:
+          defaultMode: 420
+          secretName: tls-secret
+      hostAliases:
+        {{- range .Values.hostAliases }}
+        - ip: {{ .ip }}
+          hostnames:
+            {{- range .hostnames }}
+            - {{ . }}
+            {{- end }}
+        {{- end }}
+      containers:
+      - command:
+        - bash
+        - /bootstrap/entrypoints/app.sh
+        env:
+          - name: USER_SMTP_AUTH_ENABLED
+            value: "true"
+          - name: USER_SMTP_STARTTLS
+            value: "true"
+          - name: USER_SMTP_AUTH
+            value: {{ .Values.smtp.auth.type }}
+          - name: USER_SMTP_HOST
+            value: {{ .Values.smtp.host }}
+          - name: USER_SMTP_USER
+            value: {{ .Values.smtp.auth.username }}
+          - name: USER_SMTP_PASS
+            value: {{ .Values.smtp.auth.password }}
+          - name: USER_SMTP_FROM
+            value: {{ .Values.smtp.auth.from_addr }}
+          - name: SSL_PROTOCOL
+            value: all -SSLv3 -TLSv1 -TLSv1.1
+          - name: SSL_CIPHER_SUITE
+            value: ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384
+          - name: HTTPS
+            value: "on"
+          - name: USER_USERHOSTNAME
+            value: {{ .Values.hostname }}
+          - name: REPLICATED_INTEGRATIONAPI
+            value: kotsadm:3000
+          - name: K8_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+          - name: STAKATER_DOZUKI_RESOURCES_CONFIGMAP_CONFIGMAP
+            value: da40f9ab60acade84b5b6545e8523d2e8c327c96
+          - name: STAKATER_TLS_SECRET_SECRET
+            value: d289ed7e015381d46758d393ed8b79b37adeade7
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: IfNotPresent
+        name: app
+        ports:
+          - containerPort: 80
+            protocol: TCP
+          - containerPort: 443
+            protocol: TCP
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /etc/dozuki
+            name: {{ .Values.customer }}-default
+          - mountPath: /var/www/key
+            name: le-tls-cert
+            readOnly: true
+      initContainers:
+      - name: db-startup-check
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+          - bash
+          - "/bootstrap/entrypoints/db_startup_check.sh"
+        env:
+          - name: USER_USERHOSTNAME
+            value: '{{ .Values.hostname }}'
+        volumeMounts:
+          - name: {{ .Values.customer }}-default
+            mountPath: "/etc/dozuki"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+      - name: db-initialize
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+          - bash
+          - "-e"
+          - "/bootstrap/db_initialize.sh"
+        env:
+          - name: USER_DOMAIN_NAME
+            value: '{{ .Values.hostname }}'
+          - name: USER_USERHOSTNAME
+            value: '{{ .Values.hostname }}'
+        volumeMounts:
+          - name: {{ .Values.customer }}-default
+            mountPath: "/etc/dozuki"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+      - name: db-local-snapshot
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+          - bash
+          - "/bootstrap/entrypoints/db_mysql_local_snapshot.sh"
+        env:
+          - name: APPLICATION_RELEASE_NUMBER
+            value: ''
+          - name: USER_USERHOSTNAME
+            value: '{{ .Values.hostname }}'
+        volumeMounts:
+          - name: {{ .Values.customer }}-default
+            mountPath: "/etc/dozuki"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+      - name: db-migrations
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        command:
+          - bash
+          - "/bootstrap/entrypoints/db_migrations.sh"
+        env:
+          - name: APPLICATION_RELEASE_NUMBER
+            value: ''
+          - name: USER_DOMAIN_NAME
+            value: '{{ .Values.hostname }}'
+          - name: USER_USERHOSTNAME
+            value: '{{ .Values.hostname }}'
+        volumeMounts:
+          - name: {{ .Values.customer }}-default
+            mountPath: "/etc/dozuki"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ .Values.customer }}
+                        - app
+                topologyKey: "kubernetes.io/hostname"
+
+
