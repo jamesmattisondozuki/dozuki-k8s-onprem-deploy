@@ -5,16 +5,17 @@ metadata:
   labels:
     meta.helm.sh/release-name: {{ .Values.customer }}
     meta.helm.sh/release-namespace: default
-    app: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
+    app: app
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.customer }}
+      app: app
+  replicas: 1
   template:
     metadata:
       labels:
-        app: {{ .Values.customer }}
+        app: app
     spec:
       volumes:
       - configMap:
@@ -77,8 +78,10 @@ spec:
         ports:
           - containerPort: 80
             protocol: TCP
+            hostPort: 80 
           - containerPort: 443
             protocol: TCP
+            hostPort: 443
         resources:
           requests:
             cpu: 200m

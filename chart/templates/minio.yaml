@@ -8,7 +8,7 @@ metadata:
   labels:
     app: minio
     app.kubernetes.io/managed-by: Helm
-    chart: minio-5.3.0
+    chart: minio
     heritage: Helm
     release: {{ .Values.customer }}
   name: {{ .Values.customer }}-minio
@@ -46,7 +46,7 @@ spec:
           value: {{ .Values.minio.password }}
         - name: MINIO_PROMETHEUS_AUTH_TYPE
           value: public
-        image: quay.io/minio/minio:RELEASE.2024-04-18T19-09-19Z
+        image: quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z
         imagePullPolicy: IfNotPresent
         name: minio
         ports:
@@ -92,3 +92,14 @@ spec:
         secret:
           defaultMode: 420
           secretName: {{ .Values.customer }}-minio
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: minio-sa
+  namespace: default

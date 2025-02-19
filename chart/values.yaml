@@ -1,43 +1,33 @@
-# values.yaml:
-#   This file contains the values used to create a Dozuki on-premesis depeloymet.
+# Values.yaml for Helm Chart using nested structure for multiple deployments
 
-# hostname: The DNS name for this Dozuki deployment. This name should be the
-#   dns name that you expect users to connect to.
+aws:
+  region: "us-east-1"
+  accountId: "1234567890"
+
 hostname: "onprem.dozuki.app"
-
-# dns_validation: in general this should be set to true. Set to false if deploying
-#   in a context in which you do not control the DNS server.
-dns_validation: true
-
-# environment: this value should be left as "production"
+dns_validation: true #set true if using a domain we control the dns for
 environment: "production"
-
-# customer: this is the name used to prefix all of the Kubernetes infrastructure.
-#   In practice this can be anything you like, though generally your company name is
-#   preferred. Cannot contain non-alphanumeric characters.
 customer: "onprem"
 
-# tls: This stanza deals with the SSL certificates that you will use for HTTPS connections
-#    to the Dozuki deployment.
-#    crt: Must be the fullchain (combined) certificate, base64 encoded, without any newlines.
-#    key: Must be the private key, base64 encoded, without any newlines.
-# Hint: in order to generate these values, `cat <certificate|key> | base64 -w0` and then copy+
-# paste the output.
-tls:
-  cert: "U09NRSBLRVkK"
-  key: "U09NRSBLRVkK"
+sentry:
+  dsn: "https://sentry-dsn.onprem-test.dozuki.app"
+  customerName: "example-customer"
+  channelName: "example-channel"
+  versionLabel: "1.0.0"
 
-# minio: These are the credentials for the Minio deployment. Minio is a shared file storage
-#   system, much like Amazon's S3.
+webhooks:
+  enabled: false
+
+tls:
+  cert: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURnekNDQXdxZ0F3SUJBZ0lTQTBUV1d3REQzUmVyMlRaMXFYN3RZazRaTUFvR0NDcUdTTTQ5QkFNRE1ESXgKQ3pBSkJnTlZCQVlUQWxWVE1SWXdGQVlEVlFRS0V3MU1aWFFuY3lCRmJtTnllWEIwTVFzd0NRWURWUVFERXdKRgpOVEFlRncweU5UQXlNVGN5TXpFek16ZGFGdzB5TlRBMU1UZ3lNekV6TXpaYU1Cd3hHakFZQmdOVkJBTVRFVzl1CmNISmxiUzVrYjNwMWEya3VZWEJ3TUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFT2tDQXJWamYKaUM1amJEcFB6MUczY0tndGtHNjdlYjUrakhmbEVZUUU3TXExMEhLYzF4a055NmRmYlZvTEZDT2xWVXRydW9zawplZ21KVWpoNVlLaWZYYU9DQWhRd2dnSVFNQTRHQTFVZER3RUIvd1FFQXdJSGdEQWRCZ05WSFNVRUZqQVVCZ2dyCkJnRUZCUWNEQVFZSUt3WUJCUVVIQXdJd0RBWURWUjBUQVFIL0JBSXdBREFkQmdOVkhRNEVGZ1FVWW5HQ1RNN3cKMVZRQjVpWFBSVDE2d25KVGs4a3dId1lEVlIwakJCZ3dGb0FVbnl0Znp6d2hUNTBFdCswckxNVEdjSXZTMXcwdwpWUVlJS3dZQkJRVUhBUUVFU1RCSE1DRUdDQ3NHQVFVRkJ6QUJoaFZvZEhSd09pOHZaVFV1Ynk1c1pXNWpjaTV2CmNtY3dJZ1lJS3dZQkJRVUhNQUtHRm1oMGRIQTZMeTlsTlM1cExteGxibU55TG05eVp5OHdIQVlEVlIwUkJCVXcKRTRJUmIyNXdjbVZ0TG1SdmVuVnJhUzVoY0hBd0V3WURWUjBnQkF3d0NqQUlCZ1puZ1F3QkFnRXdnZ0VGQmdvcgpCZ0VFQWRaNUFnUUNCSUgyQklIekFQRUFkZ0RtMGpGalFIZU13UkJCQnRkeHVjN0Iwa0QybG9TRys3cUhNaDM5CkhqZU9VQUFBQVpVV1pkVC9BQUFFQXdCSE1FVUNJUUNaRWtwU3VDOG4zWDAzWWROM1pHMHRtcDF5b2hneEJLK1gKdUgrTGY5enNQZ0lnR0FCMjljM3NKbHpRMTFRRitlV2dCR1hRV3dCQ1dJNDNnWlh3SVI3bzNiRUFkd0RQRVZidQoxUzU4ci9PSFc5bHBMcHZwR25GblNyQVg3S3dCMGx0M3pzdzdDQUFBQVpVV1pkVTRBQUFFQXdCSU1FWUNJUUR0Clh0ZFBSUFozNUNMNGZYNXpyVjlPdVljcUJRWS96a2UwTTBWbmpRNmlIZ0loQUpVWXdwMnVRNWdiYjQ0QkRlVUUKbnZ0WmtUZUdMSmdCa29JM1ZkeXZtYU5LTUFvR0NDcUdTTTQ5QkFNREEyY0FNR1FDTUdPazJKK25mbm9hYnFkQgpPOStjMkRlVGc1dzVwWWh3aUV3ZEpHdXJSVWRFSGU4OXRIUGpUS1JCNlBzZXZBZjhkZ0l3WG9PdEFhTWdHYWNECncxdGdSNDdKZlJmRWhEOUVlN0NHUzFRMm01NHdVSndiaDhnZFFPdW1RZXQ3d253VlFwV3oKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KTUlJRVZ6Q0NBaitnQXdJQkFnSVJBSU9QYkdQT3NUbU1ZZ1ppZ3hYSi9kNHdEUVlKS29aSWh2Y05BUUVMQlFBdwpUekVMTUFrR0ExVUVCaE1DVlZNeEtUQW5CZ05WQkFvVElFbHVkR1Z5Ym1WMElGTmxZM1Z5YVhSNUlGSmxjMlZoCmNtTm9JRWR5YjNWd01SVXdFd1lEVlFRREV3eEpVMUpISUZKdmIzUWdXREV3SGhjTk1qUXdNekV6TURBd01EQXcKV2hjTk1qY3dNekV5TWpNMU9UVTVXakF5TVFzd0NRWURWUVFHRXdKVlV6RVdNQlFHQTFVRUNoTU5UR1YwSjNNZwpSVzVqY25sd2RERUxNQWtHQTFVRUF4TUNSVFV3ZGpBUUJnY3Foa2pPUFFJQkJnVXJnUVFBSWdOaUFBUU5DenFLCmEyR090dS9jWDFqbnhrSkZWS3RqOW1aaFNBb3VXWFcwZ1FJM1VMYy9Gbm5jbU95aEtKZHlJQndzejlWOFVpQk8KVkhoYmhCUnJ3SkN1aGV6QVVVRThXb2QvQmszVS9tRFIrbXd0NFgyVkVJaWlDRlFQbVJwTTV1b0tyTmlqZ2ZndwpnZlV3RGdZRFZSMFBBUUgvQkFRREFnR0dNQjBHQTFVZEpRUVdNQlFHQ0NzR0FRVUZCd01DQmdnckJnRUZCUWNECkFUQVNCZ05WSFJNQkFmOEVDREFHQVFIL0FnRUFNQjBHQTFVZERnUVdCQlNmSzEvUFBDRlBuUVMzN1Nzc3hNWncKaTlMWERUQWZCZ05WSFNNRUdEQVdnQlI1dEZubWU3Ymw1QUZ6Z0FpSXlCcFk5dW1iYmpBeUJnZ3JCZ0VGQlFjQgpBUVFtTUNRd0lnWUlLd1lCQlFVSE1BS0dGbWgwZEhBNkx5OTRNUzVwTG14bGJtTnlMbTl5Wnk4d0V3WURWUjBnCkJBd3dDakFJQmdabmdRd0JBZ0V3SndZRFZSMGZCQ0F3SGpBY29CcWdHSVlXYUhSMGNEb3ZMM2d4TG1NdWJHVnUKWTNJdWIzSm5MekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBZ0VBSDNLZE5FVkNRZHFrMExLeXVOSW1US2RSSlkxQwoydXcyU0phanVocWt5R1BZOEMrenpzdWZaK21nbmhucTFBMktWUU9TeWtPRW5VYngxY3k2MzdyQkFpaHg5N3IrCmJjd2JaTTZzVERJYUVyaVIvUExrNkxLczlCZTB1b1Z4Z09LRGNwRzlzdkQzM0orRzlMY2Z2MUs5bHVEbVNUZ0cKNlhORklONXZmSTVncy9sTVB5b2pFTWRJeks5YmxjbDIvMXZLeE84V0dDY2p2c1ExbkovUHd0OExRWkJmT0Z5VgpYUDh1YkFwL2F1M2RjNEVLV0c5TU81emN4MXFUOStOWFJHZFZXeEd2bUJGUkFhamNpTWZYTUUxWnVHbWszL0dPCmtvQU03WmtqWm1sZXlva1AxTEd6bWZKY1VkOXM3ZWV1MS85L2VnNVhsWGQvNTVHdFlqQU0rQzRERzVpN2VhTnEKY20yRit5eFlJUHQ2Y2JidFlWTkpDR2ZIV3FIRVE0RllTdFV5Rm52OHNqeXFVOHlwZ1phTko5YVZjV1NJQ0xPSQpFMS9Rdi83b0tzblpDV0o5MjZ3VTZScUcxT1lQR09pMXp1QUJoTHc2MWN1UFZEVDI4blFTL2U2ejk1Y0pYcTBlCksxQmNhSjZmSlpzbWJqUmdENXAzbXZFZjV2ZFFNN01DRXZVMHRIYnN4Mkk1bUhISm9BQkhiOEtWQmdXcC9sY1gKR1dpV2FlT3lCN1JQK09mRHR2aTJPc2FweFhpVjd2TlZzN2ZNbHJSalkxam9LYXFtbXljbkJ2QXExNEFFYnR5TApzVmZPUzY2QjhhcGtlRlgyTlk0WFBFWVY0WlNDZThWSFByZHJFUmsyd0lMRzNUL0VHbVNJa0NZVlVNU25qbUpkClZRRDlGNk5hLyt6bVhDYz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0hBZ0VBTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEJHMHdhd0lCQVFRZ3dqeEw1VGlheDZpODhESXYKSVdQcHhnS0FicGlGYmZjUytpVnhqZlNYZXEyaFJBTkNBQVE2UUlDdFdOK0lMbU5zT2svUFViZHdxQzJRYnJ0NQp2bjZNZCtVUmhBVHN5clhRY3B6WEdRM0xwMTl0V2dzVUk2VlZTMnU2aXlSNkNZbFNPSGxncUo5ZAotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg==
+
 minio:
   user: admin
   password: jamesiscool123
 
-# memcached: The hostname for memcached. In general, this should be left as "memcached".
 memcached:
-  host: "memcached"
-
-
+  host: "onprem-memcached"
 s3:
   kmsKey: "arn:aws:kms:us-east-1:1234567890:key/some-key-id"
   imagesBucket: "s3-images-bucket"
@@ -52,23 +42,11 @@ smtp:
     enabled: false
     username: "foo"
     password: "bar"
-    type: PLAIN
-    from_addr: noreply@dozuki.com
 
 db:
   host: "172.31.4.79"
   user: "root"
   password: "123456"
-  rdsCaCert: |
-    -----BEGIN CERTIFICATE-----
-    MIIDXTCCAkWgAwIBAgIJAO9qT4jHzpTqMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
-    ...
-    -----END CERTIFICATE-----
-
-sentry:
-  dsn: "https://sentry-dsn.example.com"
-  customerName: "example-customer"
-  versionLabel: "1.0.0"
 
 surveyjs:
   licenseKey: "surveyjs-license-key"
@@ -81,8 +59,8 @@ hostAliases:
       - "dozuki.com"
       - "www.dozuki.com"
 image:
-  repository: "registry.replicated.com/dozukikots/dozuki_onprem"
-  tag: "e1a772955da4199ff7e361c40575f2e796625bbc.2"
+  repository: "069174876992.dkr.ecr.us-east-2.amazonaws.com/app"
+  tag: "1c9af92f75624110b40a1ced59286d2f34538765.1"
   pullPolicy: "IfNotPresent"
 
 
@@ -114,6 +92,7 @@ ingress:
   configurationSnippet: "proxy_set_header X-Forwarded-Proto $scheme;"
   proxyBodySize: "0"
   ingressClassName: "nginx"
+  hostame: "onprem.dozuki.app"
   tlsSecretName: "tls-secret"
   paths:
     - path: "/_next"
@@ -168,6 +147,12 @@ ingress:
         port: 3210
         name: "app"
         port: 80
+    - path: "/"
+      pathType: "Prefix"
+      service:
+        name: "app"
+        port: 80
+
 # Values.yaml for Services Template
 
 service:
@@ -760,7 +745,7 @@ deployments:
   webNextjs:
     name: nextjs
     replicaCount: 1
-    image: "069174876992.dkr.ecr.us-east-1.amazonaws.com/web-nextjs:v1.0.30"
+    image: "069174876992.dkr.ecr.us-east-1.amazonaws.com/web-nextjs:v1.0.50"
     imagePullPolicy: "IfNotPresent"
     command:
       - "node"
@@ -830,11 +815,3 @@ ingress-nginx:
       worker-processes: "auto"
       custom-http-errors: "503"
 
-
-
-aws:
-  region: "us-east-1"
-  accountId: "1234567890"
-
-webhooks:
-  enabled: false

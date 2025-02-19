@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  labels:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Values.customer }}-memcached
+    app.kubernetes.io/version: 1.6.32
+    helm.sh/chart: memcached-7.5.2
+  name: {{ .Values.customer }}-memcached
+  namespace: default
+spec:
+  ports:
+  - name: memcache
+    port: 11211
+    protocol: TCP
+    targetPort: memcache
+  selector:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/name: {{ .Values.customer }}-memcached
+
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  labels:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Values.customer }}-memcached
+    app.kubernetes.io/version: 1.6.32
+    helm.sh/chart: memcached-7.5.2
+  name: {{ .Values.customer }}-memcached
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Values.customer }}
+      app.kubernetes.io/name: {{ .Values.customer }}-memcached
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Values.customer }}
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: {{ .Values.customer }}-memcached
+        app.kubernetes.io/version: 1.6.32
+        helm.sh/chart: memcached-7.5.2
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/instance: {{ .Values.customer }}
+                  app.kubernetes.io/name: {{ .Values.customer }}-memcached
+              topologyKey: kubernetes.io/hostname
+            weight: 1
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: BITNAMI_DEBUG
+          value: "false"
+        - name: MEMCACHED_PORT_NUMBER
+          value: "11211"
+        image: docker.io/bitnami/memcached:1.6.32-debian-12-r0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - memcached
+          failureThreshold: 6
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: memcached
+        ports:
+        - containerPort: 11211
+          name: memcache
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 6
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: memcache
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 150m
+            ephemeral-storage: 2Gi
+            memory: 192Mi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 50Mi
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 1001
+          runAsNonRoot: true
+          runAsUser: 1001
+          seLinuxOptions: {}
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/bitnami/memcached/conf
+          name: empty-dir
+          subPath: app-conf-dir
+        - mountPath: /tmp
+          name: empty-dir
+          subPath: tmp-dir
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+      serviceAccount: {{ .Values.customer }}-memcached
+      serviceAccountName: {{ .Values.customer }}-memcached
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: empty-dir
+---
+apiVersion: v1
+automountServiceAccountToken: false
+kind: ServiceAccount
+metadata:
+  annotations:
+    meta.helm.sh/release-name: {{ .Values.customer }}-memcached
+    meta.helm.sh/release-namespace: default
+  labels:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: {{ .Values.customer }}-memcached
+    app.kubernetes.io/version: 1.6.32
+    helm.sh/chart: memcached-7.5.2
+  name: {{ .Values.customer }}-memcached
+  namespace: default

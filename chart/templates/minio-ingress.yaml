@@ -14,10 +14,6 @@ metadata:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       chunked_transfer_encoding off;
 spec:
-  tls:
-    - hosts:
-        - minio.{{ .Values.hostname }} 
-      secretName: tls-secret
   rules:
     - host: minio.{{ .Values.hostname }}
       http:

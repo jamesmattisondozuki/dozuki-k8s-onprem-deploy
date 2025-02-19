@@ -7,6 +7,7 @@ metadata:
     kots.io/creation-phase: "{{ .creationPhase }}"
   labels:
     app: {{ .appLabel }}
+    app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     app: {{ .appLabel }}

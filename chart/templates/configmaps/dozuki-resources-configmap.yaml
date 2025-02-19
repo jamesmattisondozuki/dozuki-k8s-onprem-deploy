@@ -59,53 +59,33 @@ data:
     {
       "baseNanositeDomain": "{{ .Values.hostname }}"
     }
-  sentry.json: |
-    {
-      "dsnPhp": "{{ .Values.sentry.dsn }}",
-      "tags": {
-        "deployment": "Private Cloud",
-        "pc_environment": "{{ .Values.environment }}",
-        "customer": "{{ .Values.customer }}",
-        "aws_account": "{{ .Values.aws.accountId }}",
-        "aws_region": "{{ .Values.aws.region }}",
-        "kots_customer": "{{ .Values.sentry.customerName }}",
-        "kots_channel": "{{ .Values.sentry.channelName }}",
-        "kots_version": "{{ .Values.sentry.versionLabel }}"
-      }
-    }
   db.json: |
     {
       "generic": {
         "hostname": "{{ .Values.db.host }}",
         "user": "{{ .Values.db.user }}",
-        "password": "{{ .Values.db.password }}",
-        "CAFile": "/etc/dozuki/rds-ca.pem"
+        "password": "{{ .Values.db.password }}"
       },
       "master": {
         "hostname": "{{ .Values.db.host }}",
         "user": "{{ .Values.db.user }}",
-        "password": "{{ .Values.db.password }}",
-        "CAFile": "/etc/dozuki/rds-ca.pem"
+        "password": "{{ .Values.db.password }}"
       },
       "slave": {
         "hostname": "{{ .Values.db.host }}",
         "user": "{{ .Values.db.user }}",
-        "password": "{{ .Values.db.password }}",
-        "CAFile": "/etc/dozuki/rds-ca.pem"
+        "password": "{{ .Values.db.password }}"
       },
       "sphinx": {
         "hostname": "{{ .Values.db.host }}",
         "user": "{{ .Values.db.user }}",
-        "password": "{{ .Values.db.password }}",
-        "CAFile": "/etc/dozuki/rds-ca.pem"
+        "password": "{{ .Values.db.password }}"
       }
     }
   surveyjs.json: |
     {
       "licenseKey": "{{ .Values.surveyjs.licenseKey }}"
     }
-  rds-ca.pem: |
-    {{ .Values.db.rdsCaCert | b64dec | nindent 4 }}
   google-translate.json: |
     {
       "apiToken": "{{ .Values.googleTranslate.token }}"

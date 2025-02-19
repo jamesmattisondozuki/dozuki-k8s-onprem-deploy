@@ -1,10 +1,14 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: default
+  annotations:
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  name: {{ .Values.customer }}-default
   namespace: default
-  meta.helm.sh/release-name: {{ .Values.customer }}
-  app.kubernetes.io/managed-by: Helm
+  labels:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
 spec:
   capacity:
     storage: 100Gi
@@ -27,6 +31,13 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
+  annotations:
+    meta.helm.sh/release-name: {{ .Values.customer }}
+    meta.helm.sh/release-namespace: default
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: {{ .Values.customer }}
+    app.kubernetes.io/managed-by: Helm
   name: {{ .Values.customer }}-minio
 spec:
   capacity:
