@@ -7,3 +7,4 @@
 # Ignore rendered manifests from airgap builder
 rendered-manifests.yaml
 *venv*
+**.idea**
